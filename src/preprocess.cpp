@@ -81,6 +81,10 @@ void Preprocess::process(const sensor_msgs::PointCloud2::ConstPtr &msg, PointClo
   case MARSIM:
     sim_handler(msg);
     break;
+
+  case ROBOSENSE:
+    robosense_handler(msg);
+    break;
   
   default:
     printf("Error LiDAR Type");
@@ -478,6 +482,78 @@ void Preprocess::sim_handler(const sensor_msgs::PointCloud2::ConstPtr &msg) {
         added_pt.curvature = 0.0;
         pl_surf.points.push_back(added_pt);
     }
+}
+
+void Preprocess::robosense_handler(const sensor_msgs::PointCloud2::ConstPtr &msg)
+{
+  pl_surf.clear();
+  pl_corn.clear();
+  pl_full.clear();
+  
+  pcl::PointCloud<robosense_ros::Point> pl_orig;
+  pcl::fromROSMsg(*msg, pl_orig);
+  int plsize = pl_orig.size();
+  pl_surf.reserve(plsize);
+
+  /*** timestamp process ***/
+  double omega_l = 3.61;       // scan angular velocity (deg/ms)
+  std::vector<bool> is_first(N_SCANS, true);
+  std::vector<double> yaw_fp(N_SCANS, 0.0);
+  
+  for (int i = 0; i < plsize; i++)
+  {
+    PointType added_pt;
+    added_pt.normal_x = 0;
+    added_pt.normal_y = 0;
+    added_pt.normal_z = 0;
+    added_pt.x = pl_orig.points[i].x;
+    added_pt.y = pl_orig.points[i].y;
+    added_pt.z = pl_orig.points[i].z;
+    added_pt.intensity = pl_orig.points[i].intensity;
+    added_pt.curvature = (pl_orig.points[i].timestamp - msg->header.stamp.toSec()) * 1000.0; // ms
+
+    double dist = added_pt.x * added_pt.x + added_pt.y * added_pt.y + added_pt.z * added_pt.z;
+    if (dist < blind * blind || 
+        std::isnan(added_pt.x) || 
+        std::isnan(added_pt.y) || 
+        std::isnan(added_pt.z)) continue;
+
+    if(feature_enabled)
+    {
+      int layer = pl_orig.points[i].ring;
+      if (layer >= N_SCANS) continue;
+      pl_buff[layer].push_back(added_pt);
+    }
+    else 
+    {
+      if(i % point_filter_num != 0) continue;
+      pl_surf.points.push_back(added_pt);
+    }
+  }
+
+  if(feature_enabled)
+  {
+    for(int j = 0; j < N_SCANS; j++)
+    {
+      PointCloudXYZI &pl = pl_buff[j];
+      int linesize = pl.size();
+      if(linesize < 2) continue;
+      vector<orgtype> &types = typess[j];
+      types.clear();
+      types.resize(linesize);
+      linesize--;
+      for(uint i = 0; i < linesize; i++)
+      {
+        types[i].range = sqrt(pl[i].x * pl[i].x + pl[i].y * pl[i].y);
+        vx = pl[i].x - pl[i + 1].x;
+        vy = pl[i].y - pl[i + 1].y;
+        vz = pl[i].z - pl[i + 1].z;
+        types[i].dista = vx * vx + vy * vy + vz * vz;
+      }
+      types[linesize].range = sqrt(pl[linesize].x * pl[linesize].x + pl[linesize].y * pl[linesize].y);
+      give_feature(pl, types);
+    }
+  }
 }
 
 void Preprocess::give_feature(pcl::PointCloud<PointType> &pl, vector<orgtype> &types)
