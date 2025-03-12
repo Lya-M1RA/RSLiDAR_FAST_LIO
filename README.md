@@ -50,10 +50,15 @@ Follow [livox_ros_driver Installation](https://github.com/Livox-SDK/livox_ros_dr
 - How to source? The easiest way is add the line ``` source $Livox_ros_driver_dir$/devel/setup.bash ``` to the end of file ``` ~/.bashrc ```, where ``` $Livox_ros_driver_dir$ ``` is the directory of the livox ros driver workspace (should be the ``` ws_livox ``` directory if you completely followed the livox official document).
 
 ## 4 IMU init pose
-RoboSense Airy has an internal IMU. The transformation matrix from an Airy's lidar frame to its IMU frame is 
-$$
-\begin{bmatrix} 0 & -1 & 0 \\ -1 & 0 & 0\\ 0 & 0 & -1\end{bmatrix}
-$$
+RoboSense Airy has an internal IMU. The transformation matrix from an Airy's lidar frame to its IMU frame is  
+
+$$ 
+\begin{matrix} 
+0 & -1 & 0 \\\ 
+-1 & 0 & 0 \\\ 
+0 & 0 & -1  
+\end{matrix}
+$$ 
 
 ## 5 More details
 For more details, please refer to the original [README](https://github.com/Lya-M1RA/RSLiDAR_FAST_LIO/blob/main/README_ORIGIN.md) of FAST-LIO.
