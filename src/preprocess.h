@@ -96,13 +96,13 @@ namespace robosense_ros {
 
 // namespace robosense_ros
 POINT_CLOUD_REGISTER_POINT_STRUCT(robosense_ros::Point,
-                                (float, x, x)
-                                        (float, y, y)
-                                        (float, z, z)
-                                        // use std::uint32_t to avoid conflicting with pcl::uint32_t
-                                        (float, intensity, intensity)
-                                        (std::uint16_t, ring, ring)
-                                        (double, timestamp, timestamp)
+    (float, x, x)
+    (float, y, y)
+    (float, z, z)
+    // use std::uint32_t to avoid conflicting with pcl::uint32_t
+    (float, intensity, intensity)
+    (std::uint16_t, ring, ring)
+    (double, timestamp, timestamp)
 )
 
 class Preprocess
