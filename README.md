@@ -60,5 +60,14 @@ $$
 \end{matrix}
 $$ 
 
+RoboSense E1R also has an internal IMU. The transformation matrix from an E1R's lidar frame to its IMU frame is  
+
+$$ 
+\begin{matrix} 
+0 & -1 & 0 \\\ 
+0 & 0 & 1 \\\ 
+-1 & 0 & 0  
+\end{matrix}
+$$ 
 ## 5 More details
 For more details, please refer to the original [README](https://github.com/Lya-M1RA/RSLiDAR_FAST_LIO/blob/main/README_ORIGIN.md) of FAST-LIO.
